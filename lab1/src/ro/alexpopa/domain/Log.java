@@ -11,8 +11,8 @@ public final class Log {
         operations = new ArrayList<>();
     }
 
-    public void log(OperationType type, int sum){
-        operations.add(new Operation(type,operations.size(),sum));
+    public void log(OperationType type, int sum, int src, int dest, long timestamp){
+        operations.add(new Operation(type,src, dest,sum,timestamp));
     }
 
     public void printAllOperations(){

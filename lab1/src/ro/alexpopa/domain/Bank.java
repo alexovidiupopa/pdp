@@ -3,17 +3,21 @@ package ro.alexpopa.domain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 public final class Bank {
     public List<Account> accounts;
 
-    private static final int NO_THREADS = 10;
+    private static final int NO_THREADS = 5;
     private static final int NO_ACCOUNTS = 100;
     private static final long NO_OPERATIONS = 50000 ;
 
+    public ReentrantLock lock;
 
     public Bank() {
         accounts = new ArrayList<>();
+        lock = new ReentrantLock();
     }
 
     @Override
@@ -35,8 +39,8 @@ public final class Bank {
             threads.add(new Thread(() -> {
                 Random r = new Random();
                 for(long j = 0; j <NO_OPERATIONS/NO_THREADS; ++j){
-                    int accId = r.nextInt(100);
-                    int accId2 = r.nextInt(100);
+                    int accId = r.nextInt(NO_ACCOUNTS);
+                    int accId2 = r.nextInt(NO_ACCOUNTS);
                     if (accId == accId2){
                         --j;
                         continue;
@@ -44,17 +48,18 @@ public final class Bank {
 
                     int sum = r.nextInt(25);
                     accounts.get(accId).makeTransfer(accounts.get(accId2),sum);
-                    //System.out.println("[Thread " + finalI + "]:" + sum + " were transferred from acc" + accId + " to acc " + accId2);
+                    //System.out.println("[Thread " + finalI + "]:" + sum + "$ were transferred from acc " + accId + " to acc " + accId2);
 
-
-                    if (r.nextInt(9)==0){
+                    /*if (r.nextInt(9)==0){
                         runCorrectnessCheck();
-                    }
+                    }*/
                 }
             }));
         }
 
+
         threads.forEach(Thread::start);
+
 
         threads.forEach(thread -> {
             try {
@@ -80,14 +85,25 @@ public final class Bank {
     }
 
     private void runCorrectnessCheck() {
-        int failedAccounts = 0;
-        for (Account account:accounts){
+        AtomicInteger failedAccounts = new AtomicInteger();
+        accounts.forEach(account -> {  // check the balance of each account
             if (!account.check()){
-                failedAccounts++;
+                failedAccounts.getAndIncrement();
+            }
+        });
+
+        for (Account account : accounts) { // check that for each operation in each account there is a "symmetric" operation in the destination account of the operation
+            for (Operation op : account.log.operations) {
+                Account targetAccount = accounts.get(op.dest);
+                if (!targetAccount.log.operations.contains(new Operation(OperationType.RECEIVE, op.dest, op.src, op.amount, op.timestamp))) {
+                    failedAccounts.getAndIncrement();
+                }
             }
         }
-        if (failedAccounts>0){
-            //throw new RuntimeException("Accounts are no longer correct and consistent");
+
+        if (failedAccounts.get() >0){
+            throw new RuntimeException("Accounts are no longer correct and consistent");
         }
+
     }
 }

@@ -15,7 +15,7 @@ public final class Account {
         this.uid=uid;
         this.initialBalance = balance;
         this.balance = balance;
-        mtx = new ReentrantLock();
+        this.mtx = new ReentrantLock();
         this.log = new Log();
     }
 
@@ -35,8 +35,9 @@ public final class Account {
 
         balance-=sum;
         other.balance+=sum;
-        logTransfer(OperationType.SEND,sum);
-        other.logTransfer(OperationType.RECEIVE,sum);
+        long timestamp = System.currentTimeMillis();
+        logTransfer(OperationType.SEND,this.uid, other.uid,sum, timestamp);
+        other.logTransfer(OperationType.RECEIVE,other.uid, this.uid, sum, timestamp);
 
         this.mtx.unlock();
         other.mtx.unlock();
@@ -45,8 +46,8 @@ public final class Account {
     }
 
 
-    public void logTransfer(OperationType type, int sum){
-        log.log(type,sum);
+    public void logTransfer(OperationType type, int src, int dest, int sum, long timestamp){
+        log.log(type,sum, src, dest, timestamp);
     }
 
     public boolean check() {
@@ -61,4 +62,6 @@ public final class Account {
         this.mtx.unlock();
         return initialBalance==this.balance;
     }
+
+
 }
