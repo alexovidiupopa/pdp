@@ -2,7 +2,6 @@ package ro.alexpopa.domain;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public final class Log {
     public List<Operation> operations;
@@ -15,7 +14,4 @@ public final class Log {
         operations.add(new Operation(type,src, dest,sum,timestamp));
     }
 
-    public void printAllOperations(){
-        System.out.println(operations.stream().map(Object::toString).collect(Collectors.joining()));
-    }
 }

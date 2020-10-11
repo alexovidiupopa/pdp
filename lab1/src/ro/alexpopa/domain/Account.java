@@ -11,6 +11,7 @@ public final class Account {
 
     public Lock mtx;
 
+
     public Account(int uid, int balance) {
         this.uid=uid;
         this.initialBalance = balance;
@@ -51,16 +52,14 @@ public final class Account {
     }
 
     public boolean check() {
-        this.mtx.lock();
-        int initialBalance = this.initialBalance;
+        int initBalance = this.initialBalance;
         for (Operation operation: this.log.operations){
             if (operation.type==OperationType.SEND)
-                initialBalance-=operation.amount;
+                initBalance-=operation.amount;
             else
-                initialBalance+=operation.amount;
+                initBalance+=operation.amount;
         }
-        this.mtx.unlock();
-        return initialBalance==this.balance;
+        return initBalance==this.balance;
     }
 
 
