@@ -6,9 +6,9 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class ProducerConsumerHelper {
+public final class ProducerConsumerHelper {
     public static final int CAPACITY = 1;
-    public final Queue queue = new LinkedList();
+    public final Queue<Integer> queue = new LinkedList();
 
     public Lock lock = new ReentrantLock();
     public Condition condVar = lock.newCondition();
@@ -46,7 +46,7 @@ public class ProducerConsumerHelper {
                 condVar.await();
             }
 
-            Integer value = (Integer) queue.poll();
+            Integer value = queue.poll();
             if (value != null) {
                 System.out.printf("%s consumed %d from queue %n", Thread
                         .currentThread().getName(), value);

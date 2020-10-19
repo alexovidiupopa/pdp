@@ -2,7 +2,7 @@ package ro.alexpopa.domain;
 
 import java.util.List;
 
-public class Vector {
+public final class Vector {
     private List<Integer> content;
     private int length;
 

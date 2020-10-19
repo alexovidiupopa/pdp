@@ -13,6 +13,7 @@ public final class Bank {
     private static final int NO_THREADS = 10;
     private static final int NO_ACCOUNTS = 100;
     private static final long NO_OPERATIONS = 50000;
+    private static final long OPERATIONS_PER_THREAD = NO_OPERATIONS/NO_THREADS;
 
     public Lock mtx = new ReentrantLock();
 
@@ -40,7 +41,7 @@ public final class Bank {
             int finalI = i;
             threads.add(new Thread(() -> {
                 Random r = new Random();
-                for(long j = 0; j <NO_OPERATIONS/NO_THREADS; ++j){
+                for(long j = 0; j <OPERATIONS_PER_THREAD; ++j){
                     int accId = r.nextInt(NO_ACCOUNTS);
                     int accId2 = r.nextInt(NO_ACCOUNTS);
                     if (accId == accId2){
@@ -106,6 +107,7 @@ public final class Bank {
     }
 
     private void runCorrectnessCheck() {
+        //System.out.println("Started checking logs");
         AtomicInteger failedAccounts = new AtomicInteger();
         accounts.forEach(account -> {
             account.mtx.lock();// check the balance of each account
@@ -129,6 +131,6 @@ public final class Bank {
         if (failedAccounts.get() >0){
             throw new RuntimeException("Accounts are no longer correct and consistent");
         }
-
+        //System.out.println("Ended checking logs");
     }
 }

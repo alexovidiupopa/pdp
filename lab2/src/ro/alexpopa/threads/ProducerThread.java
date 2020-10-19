@@ -2,7 +2,7 @@ package ro.alexpopa.threads;
 
 import ro.alexpopa.domain.Vector;
 
-public class ProducerThread extends Thread {
+public final class ProducerThread extends Thread {
 
     public int length;
     public ProducerConsumerHelper helper;

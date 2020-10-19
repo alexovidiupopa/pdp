@@ -1,6 +1,6 @@
 package ro.alexpopa.threads;
 
-public class ConsumerThread extends Thread {
+public final class ConsumerThread extends Thread {
     public int result = 0;
     public ProducerConsumerHelper helper;
     public int length;
