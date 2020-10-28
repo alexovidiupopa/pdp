@@ -52,7 +52,7 @@ public final class Bank {
                     int sum = r.nextInt(25);
                     accounts.get(accId).makeTransfer(accounts.get(accId2),sum);
 
-                    System.out.println("[Thread " + finalI + "]:" + sum + "$ were transferred from acc " + accId + " to acc " + accId2);
+                    //System.out.println("[Thread " + finalI + "]:" + sum + "$ were transferred from acc " + accId + " to acc " + accId2);
                 }
             }));
         }
@@ -107,7 +107,7 @@ public final class Bank {
     }
 
     private void runCorrectnessCheck() {
-        //System.out.println("Started checking logs");
+        System.out.println("Started checking logs");
         AtomicInteger failedAccounts = new AtomicInteger();
         accounts.forEach(account -> {
             account.mtx.lock();// check the balance of each account
@@ -131,6 +131,6 @@ public final class Bank {
         if (failedAccounts.get() >0){
             throw new RuntimeException("Accounts are no longer correct and consistent");
         }
-        //System.out.println("Ended checking logs");
+        System.out.println("Ended checking logs");
     }
 }

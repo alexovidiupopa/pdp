@@ -6,32 +6,28 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public final class ProducerConsumerHelper {
-    public static final int CAPACITY = 1;
-    public final Queue<Integer> queue = new LinkedList();
+public final class ProducerConsumerBuffer {
+    private static final int CAPACITY = 1;
+    private final Queue<Integer> queue = new LinkedList();
 
-    public Lock lock = new ReentrantLock();
-    public Condition condVar = lock.newCondition();
+    private final Lock lock = new ReentrantLock();
+    private final Condition condVar = lock.newCondition();
 
     public void put(int val) throws InterruptedException {
         lock.lock();
         try {
             while (queue.size() == CAPACITY) {
                 System.out.println(Thread.currentThread().getName()
-                        + ": Buffer is full, waiting");
+                        + ": Queue is full, waiting...");
                 condVar.await();
             }
 
-            boolean isAdded = queue.offer(val);
-            if (isAdded) {
-                System.out.printf("%s added %d into queue %n", Thread
-                        .currentThread().getName(), val);
+            queue.add(val);
+            System.out.printf("%s added %d into the queue %n", Thread
+                    .currentThread().getName(), val);
 
-                // signal consumer thread that, buffer has element now
-                System.out.println(Thread.currentThread().getName()
-                        + ": Signalling that buffer is not empty anymore");
-                condVar.signal();
-            }
+            condVar.signal();
+
         } finally {
             lock.unlock();
         }
@@ -48,12 +44,9 @@ public final class ProducerConsumerHelper {
 
             Integer value = queue.poll();
             if (value != null) {
-                System.out.printf("%s consumed %d from queue %n", Thread
+                System.out.printf("%s consumed %d from the queue %n", Thread
                         .currentThread().getName(), value);
 
-                // signal producer thread that, buffer may be empty now
-                System.out.println(Thread.currentThread().getName()
-                        + ": Signalling that buffer may be empty now");
                 condVar.signal();
             }
             return value;
