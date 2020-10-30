@@ -1,18 +1,19 @@
 package ro.alexpopa;
 
 import ro.alexpopa.model.Matrix;
+import ro.alexpopa.model.MatrixException;
 import ro.alexpopa.runner.NormalThreadRunner;
 import ro.alexpopa.runner.ThreadPoolRunner;
 
 public class Main {
 
-    private static final int n1=4;
-    private static final int m1=4;
-    private static final int n2=4;
-    private static final int m2=4;
+    private static final int n1=100;
+    private static final int m1=100;
+    private static final int n2=100;
+    private static final int m2=100;
 
     private static final int NO_THREADS = 3;
-    private static final String APPROACH = "NORMAL";
+    private static final String APPROACH = "Normal";
     private static final String FUNCTION = "Row";
 
     public static void main(String[] args) {
@@ -27,14 +28,22 @@ public class Main {
         System.out.println(a);
         System.out.println(b);
 
-        if (a.n == b.m){
+        if (a.m == b.n){
             Matrix result = new Matrix(a.n, b.m);
             float start = System.nanoTime() / 1_000_000;
-            if (APPROACH.equals("POOL")){
-                ThreadPoolRunner.run(a,b,result, NO_THREADS, FUNCTION);
+            if (APPROACH.equals("Pool")){
+                try {
+                    ThreadPoolRunner.run(a,b,result, NO_THREADS, FUNCTION);
+                } catch (MatrixException e) {
+                    System.err.println(e.getMessage());
+                }
             }
-            else if (APPROACH.equals("NORMAL")){
-                NormalThreadRunner.run(a,b,result, NO_THREADS, FUNCTION);
+            else if (APPROACH.equals("Normal")){
+                try {
+                    NormalThreadRunner.run(a,b,result, NO_THREADS, FUNCTION);
+                } catch (MatrixException e) {
+                    System.err.println(e.getMessage());
+                }
             }
             else {
                 System.err.println("Invalid approach.");

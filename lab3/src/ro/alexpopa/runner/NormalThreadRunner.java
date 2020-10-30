@@ -1,32 +1,32 @@
 package ro.alexpopa.runner;
 
 import ro.alexpopa.model.Matrix;
+import ro.alexpopa.model.MatrixException;
 import ro.alexpopa.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class NormalThreadRunner {
-    public static void run(Matrix a, Matrix b, Matrix c, int noThreads, String threadType){
+public final class NormalThreadRunner {
+    public static void run(Matrix a, Matrix b, Matrix c, int noThreads, String threadType) throws MatrixException {
         List<Thread> threadsList = new ArrayList<>();
 
         switch (threadType) {
             case "Row":
                 for (int i=0;i<noThreads;i++)
-                    threadsList.add(Utils.createRowThread(i, a, b, c, noThreads));
+                    threadsList.add(Utils.initRowThread(i, a, b, c, noThreads));
                 break;
             case "Column":
                 for (int i=0;i<noThreads;i++)
-                    threadsList.add(Utils.createColumnThread(i, a, b, c, noThreads));
+                    threadsList.add(Utils.initColThread(i, a, b, c, noThreads));
 
                 break;
             case "Kth":
                 for (int i=0;i<noThreads;i++)
-                    threadsList.add(Utils.createKthThread(i, a, b, c, noThreads));
+                    threadsList.add(Utils.initKThread(i, a, b, c, noThreads));
                 break;
             default:
-                System.err.println("Invalid strategy");
-                return;
+                throw new MatrixException("Invalid strategy");
         }
 
         for (Thread thread : threadsList) {
@@ -39,7 +39,6 @@ public class NormalThreadRunner {
                 e.printStackTrace();
             }
         }
-        System.out.println("result:");
-        System.out.println(c);
+        System.out.println("result:\n" + c.toString());
     }
 }
