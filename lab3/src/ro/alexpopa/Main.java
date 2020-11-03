@@ -7,14 +7,14 @@ import ro.alexpopa.runner.ThreadPoolRunner;
 
 public class Main {
 
-    private static final int n1=100;
-    private static final int m1=100;
-    private static final int n2=100;
-    private static final int m2=100;
+    private static final int n1=3;
+    private static final int m1=3;
+    private static final int n2=3;
+    private static final int m2=3;
 
-    private static final int NO_THREADS = 3;
-    private static final String APPROACH = "Normal";
-    private static final String FUNCTION = "Row";
+    private static final int NO_THREADS = 4;
+    private static final String APPROACH = "Pool";
+    private static final String FUNCTION = "Kth";
 
     public static void main(String[] args) {
 	// write your code here

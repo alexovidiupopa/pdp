@@ -18,6 +18,7 @@ public final class Matrix {
             for (int j = 0; j < m; j++) {
                 matrix[i][j] = random.nextInt(10)+1;
             }
+
         }
     }
 
