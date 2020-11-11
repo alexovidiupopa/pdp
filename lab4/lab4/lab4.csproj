@@ -44,11 +44,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="domain\CustomSocket.cs" />
-    <Compile Include="impl\AsyncImpl.cs" />
     <Compile Include="impl\CallbackImpl.cs" />
-    <Compile Include="impl\EventDrivenImpl.cs" />
+    <Compile Include="impl\TaskImpl.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="utils\Parser.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

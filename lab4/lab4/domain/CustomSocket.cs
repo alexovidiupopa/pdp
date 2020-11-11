@@ -1,24 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace lab4.domain
 {
     class CustomSocket
     {
-        public Socket socket = null;
+        public Socket sock = null; // socket to connect to server
 
-        public byte[] buffer = new byte[512];
+        public const int BUFF_SIZE = 512; // 512 bytes 
 
-        public StringBuilder response = new StringBuilder();
+        public byte[] buffer = new byte[BUFF_SIZE]; // buffer
 
-        public int id;
+        public StringBuilder responseContent = new StringBuilder();
 
-        public string hostname;
+        public int id; // index of obj
+        public string hostname; // website address
+        public string endpoint; // website navigation specifics
 
-        public string endpoint;
+        public IPEndPoint remoteEndPoint; // ip of endpoint website
+
+        // events 
+        public ManualResetEvent connectDone = new ManualResetEvent(false);
+        public ManualResetEvent sendDone = new ManualResetEvent(false);
+        public ManualResetEvent receiveDone = new ManualResetEvent(false);
     }
 }
