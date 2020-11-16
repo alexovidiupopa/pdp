@@ -14,10 +14,9 @@ namespace lab4
         static void Main(string[] args)
         {
             var hosts = new string[] { "www.cs.ubbcluj.ro/~motogna/LFTC", "www.cs.ubbcluj.ro/~rlupsa/edu/pdp/", "www.cs.ubbcluj.ro/~forest" }.ToList();
-            //TaskImpl.run(hosts, false);
-            CallbackImpl.run(hosts);
-        
-
+            TaskImpl.run(hosts, false);
+            //CallbackImpl.run(hosts);
+       
         }
     }
 }

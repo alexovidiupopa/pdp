@@ -12,11 +12,11 @@ namespace lab4.impl
 {
     class TaskImpl
     {
-        private static List<string> hostNames;
+        private static List<string> hosts;
 
         public static void run(List<string> hostnames, bool async)
         {
-            hostNames = hostnames;
+            hosts = hostnames;
             var tasks = new List<Task>();
 
             for (var i = 0; i < hostnames.Count; i++)
@@ -38,43 +38,43 @@ namespace lab4.impl
         {
             var id = (int)idObject;
 
-            StartAsyncClient(hostNames[id], id);
+            StartAsyncClient(hosts[id], id);
         }
 
         private static void DoStart(object idObject)
         {
             var id = (int)idObject;
 
-            StartClient(hostNames[id], id);
+            StartClient(hosts[id], id);
         }
 
         private static void StartClient(string host, int id)
         {
-            var ipHostInfo = Dns.GetHostEntry(host.Split('/')[0]); // get dns record
+            var ipHostInfo = Dns.GetHostEntry(host.Split('/')[0]); 
             var ipAddr = ipHostInfo.AddressList[0];
-            var remEndPoint = new IPEndPoint(ipAddr, Parser.PORT); // basically stuff after "/" in the url
+            var remEndPoint = new IPEndPoint(ipAddr, Parser.PORT); 
 
-            var cl = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            var client = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-            var state = new CustomSocket
+            var requestSocket = new CustomSocket
             {
-                sock = cl,
+                sock = client,
                 hostname = host.Split('/')[0],
                 endpoint = host.Contains("/") ? host.Substring(host.IndexOf("/", StringComparison.Ordinal)) : "/",
                 remoteEndPoint = remEndPoint,
                 id = id
-            }; // state object
+            }; 
 
-            ConnectWrapper(state).Wait(); // connect to remote server
-            SendWrapper(state, Parser.GetRequestString(state.hostname, state.endpoint))
+            Connect(requestSocket).Wait(); // connect to remote server
+            Send(requestSocket, Parser.GetRequestString(requestSocket.hostname, requestSocket.endpoint))
                 .Wait(); // request data from server
-            ReceiveWrapper(state).Wait(); // receive server response
+            Receive(requestSocket).Wait(); // receive server response
 
-            Console.WriteLine("Content length is:{0}", Parser.GetContentLen(state.responseContent.ToString()));
-            
+            Console.WriteLine("Connection {0} > Content length is:{1}", requestSocket.id, Parser.GetContentLen(requestSocket.responseContent.ToString()));
+
             // release the socket
-            cl.Shutdown(SocketShutdown.Both);
-            cl.Close();
+            client.Shutdown(SocketShutdown.Both);
+            client.Close();
         }
 
         private static async void StartAsyncClient(string host, int id)
@@ -84,10 +84,9 @@ namespace lab4.impl
             var remoteEndpoint = new IPEndPoint(ipAddress, Parser.PORT);
 
             // create the TCP/IP socket
-            var client =
-                new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp); // create client socket
+            var client = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp); // create client socket
 
-            var state = new CustomSocket
+            var requestSocket = new CustomSocket
             {
                 sock = client,
                 hostname = host.Split('/')[0],
@@ -96,66 +95,66 @@ namespace lab4.impl
                 id = id
             }; // state object
 
-            await ConnectAsyncWrapper(state); // connect to remote server
+            await ConnectAsync(requestSocket); // connect to remote server
 
-            await SendAsyncWrapper(state,
-                Parser.GetRequestString(state.hostname, state.endpoint)); // request data from the server
+            await SendAsync(requestSocket,
+                Parser.GetRequestString(requestSocket.hostname, requestSocket.endpoint)); // request data from the server
 
-            await ReceiveAsyncWrapper(state); // receive server response
+            await ReceiveAsync(requestSocket); // receive server response
 
-            Console.WriteLine("Content length is:{0}", Parser.GetContentLen(state.responseContent.ToString()));
+            Console.WriteLine("Connection {0} > Content length is:{1}", requestSocket.id, Parser.GetContentLen(requestSocket.responseContent.ToString()));
 
             // release the socket
             client.Shutdown(SocketShutdown.Both);
             client.Close();
         }
 
-        private static async Task ConnectAsyncWrapper(CustomSocket state)
+        private static async Task ConnectAsync(CustomSocket state)
         {
             state.sock.BeginConnect(state.remoteEndPoint, ConnectCallback, state);
 
-            await Task.FromResult<object>(state.connectDone.WaitOne());
+            await Task.FromResult<object>(state.connectDone.WaitOne()); // block until signaled
         }
 
-        private static Task ConnectWrapper(CustomSocket state)
+        private static Task Connect(CustomSocket state)
         {
             state.sock.BeginConnect(state.remoteEndPoint, ConnectCallback, state);
 
-            return Task.FromResult(state.connectDone.WaitOne());
+            return Task.FromResult(state.connectDone.WaitOne()); // block until signaled
         }
 
         private static void ConnectCallback(IAsyncResult ar)
         {
             // retrieve the details from the connection information wrapper
-            var state = (CustomSocket)ar.AsyncState;
-            var clientSocket = state.sock;
-            var clientId = state.id;
-            var hostname = state.hostname;
+            var resultSocket = (CustomSocket)ar.AsyncState;
+            var clientSocket = resultSocket.sock;
+            var clientId = resultSocket.id;
+            var hostname = resultSocket.hostname;
 
             clientSocket.EndConnect(ar); // complete connection
 
-            Console.WriteLine("{0} --> Socket connected to {1} ({2})", clientId, hostname, clientSocket.RemoteEndPoint);
+            Console.WriteLine("Connection {0} > Socket connected to {1} ({2})", clientId, hostname, clientSocket.RemoteEndPoint);
 
-            state.connectDone.Set(); // signal connection is up
+            resultSocket.connectDone.Set(); // signal connection is up
         }
 
-        private static async Task SendAsyncWrapper(CustomSocket state, string data)
+        private static async Task SendAsync(CustomSocket state, string data)
         {
             var byteData = Encoding.ASCII.GetBytes(data);
 
-            // begin sending the data to the server  
+            // send data
             state.sock.BeginSend(byteData, 0, byteData.Length, 0, SendCallback, state);
 
             await Task.FromResult<object>(state.sendDone.WaitOne());
         }
 
 
-        private static Task SendWrapper(CustomSocket state, string data)
+        private static Task Send(CustomSocket state, string data)
         {
             // convert the string data to byte data using ASCII encoding.  
             var byteData = Encoding.ASCII.GetBytes(data);
 
-            // begin sending the data to the server  
+            // send data  
             state.sock.BeginSend(byteData, 0, byteData.Length, 0, SendCallback, state);
 
             return Task.FromResult(state.sendDone.WaitOne());
@@ -163,28 +162,28 @@ namespace lab4.impl
 
         private static void SendCallback(IAsyncResult ar)
         {
-            var state = (CustomSocket)ar.AsyncState;
-            var clientSocket = state.sock;
-            var clientId = state.id;
+            var resultSocket = (CustomSocket)ar.AsyncState;
+            var clientSocket = resultSocket.sock;
+            var clientId = resultSocket.id;
 
             var bytesSent = clientSocket.EndSend(ar); // complete sending the data to the server  
 
-            Console.WriteLine("{0} --> Sent {1} bytes to server.", clientId, bytesSent);
+            Console.WriteLine("Connection {0} > Sent {1} bytes to server.", clientId, bytesSent);
 
-            state.sendDone.Set(); // signal that all bytes have been sent
+            resultSocket.sendDone.Set(); // signal that all bytes have been sent
         }
 
-        private static async Task ReceiveAsyncWrapper(CustomSocket state)
+        private static async Task ReceiveAsync(CustomSocket state)
         {
-            // begin receiving the data from the server
+            // receive data
             state.sock.BeginReceive(state.buffer, 0, CustomSocket.BUFF_SIZE, 0, ReceiveCallback, state);
 
             await Task.FromResult<object>(state.receiveDone.WaitOne());
         }
 
-        private static Task ReceiveWrapper(CustomSocket state)
+        private static Task Receive(CustomSocket state)
         {
-            // begin receiving the data from the server
+            // receive data
             state.sock.BeginReceive(state.buffer, 0, CustomSocket.BUFF_SIZE, 0, ReceiveCallback, state);
 
             return Task.FromResult(state.receiveDone.WaitOne());
@@ -193,8 +192,8 @@ namespace lab4.impl
         private static void ReceiveCallback(IAsyncResult ar)
         {
             // retrieve the details from the connection information wrapper
-            var state = (CustomSocket)ar.AsyncState;
-            var clientSocket = state.sock;
+            var resultSocket = (CustomSocket)ar.AsyncState;
+            var clientSocket = resultSocket.sock;
 
             try
             {
@@ -202,20 +201,16 @@ namespace lab4.impl
                 var bytesRead = clientSocket.EndReceive(ar);
 
                 // get from the buffer, a number of characters <= to the buffer size, and store it in the responseContent
-                state.responseContent.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
+                resultSocket.responseContent.Append(Encoding.ASCII.GetString(resultSocket.buffer, 0, bytesRead));
 
                 // if the response header has not been fully obtained, get the next chunk of data
-                if (!Parser.ResponseHeaderObtained(state.responseContent.ToString()))
+                if (!Parser.ResponseHeaderObtained(resultSocket.responseContent.ToString()))
                 {
-                    clientSocket.BeginReceive(state.buffer, 0, CustomSocket.BUFF_SIZE, 0, ReceiveCallback, state);
+                    clientSocket.BeginReceive(resultSocket.buffer, 0, CustomSocket.BUFF_SIZE, 0, ReceiveCallback, resultSocket);
                 }
                 else
                 {
-                    foreach (var i in state.responseContent.ToString().Split('\r', '\n'))
-                        Console.WriteLine(i);
-
-                    state.receiveDone.Set(); // signal that all bytes have been received  
-                    
+                    resultSocket.receiveDone.Set(); // signal that all bytes have been received       
                 }
             }
             catch (Exception e)
