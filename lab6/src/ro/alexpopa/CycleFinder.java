@@ -47,8 +47,7 @@ public final class CycleFinder implements Runnable{
     }
 
     public static void findHamiltonian(DirectedGraph graph, int threadCount) throws InterruptedException {
-        ExecutorService pool = new ThreadPoolExecutor(threadCount, threadCount, 0L, TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(threadCount, true));
+        ExecutorService pool = Executors.newFixedThreadPool(threadCount);
 
         List<Integer> result = new ArrayList<>(graph.size());
 
