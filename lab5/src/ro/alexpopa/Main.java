@@ -9,8 +9,8 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException, ExecutionException {
 	// write your code here
-        Polynomial p = new Polynomial(10);
-        Polynomial q = new Polynomial(10);
+        Polynomial p = new Polynomial(100);
+        Polynomial q = new Polynomial(100);
 
         System.out.println("P:" + p);
         System.out.println("Q:" + q);

@@ -2,8 +2,8 @@ package ro.alexpopa;
 
 public class Main {
 
-    private static final int NR_GRAPHS = 500;
-    private static final int NR_THREADS = 1;
+    private static final int NR_GRAPHS = 50;
+    private static final int NR_THREADS = 5;
 
     public static void main(String[] args) throws InterruptedException {
         for (int i = 1; i <= NR_GRAPHS; i++) {
