@@ -69,8 +69,8 @@ public final class Operation {
         Polynomial z3 = karatsubaSequential(highP1, highP2);
 
         //calculate the final result
-        Polynomial r1 = Polynomial.shiftRight(z3, 2 * len);
-        Polynomial r2 = Polynomial.shiftRight(Polynomial.subtract(Polynomial.subtract(z2, z3), z1), len);
+        Polynomial r1 = Polynomial.addZeros(z3, 2 * len);
+        Polynomial r2 = Polynomial.addZeros(Polynomial.subtract(Polynomial.subtract(z2, z3), z1), len);
         Polynomial result = Polynomial.add(Polynomial.add(r1, r2), z1);
         return result;
     }
@@ -78,7 +78,7 @@ public final class Operation {
 
     public static Polynomial karatsubaThreaded(Polynomial p1, Polynomial p2, int currentDepth)
             throws ExecutionException, InterruptedException {
-        //optimization
+        //the idea is that from a point it's not worth to split more
         if (currentDepth > 4) {
             return karatsubaSequential(p1, p2);
         }
@@ -94,7 +94,7 @@ public final class Operation {
         Polynomial highP2 = new Polynomial(p2.getCoefficients().subList(len, p2.getLength()));
 
         ExecutorService executor = Executors.newFixedThreadPool(NR_THREADS);
-        Future<Polynomial> f1 = executor.submit(()->karatsubaThreaded(lowP1, lowP2, currentDepth + 1));
+        Future<Polynomial> f1 = executor.submit(() -> karatsubaThreaded(lowP1, lowP2, currentDepth + 1));
         Future<Polynomial> f2 = executor.submit(() -> karatsubaThreaded(Polynomial.add(lowP1, highP1), Polynomial
                 .add(lowP2, highP2), currentDepth + 1));
         Future<Polynomial> f3 = executor.submit(() -> karatsubaThreaded(highP1, highP2, currentDepth));
@@ -108,8 +108,8 @@ public final class Operation {
         executor.awaitTermination(60, TimeUnit.SECONDS);
 
         //calculate the final result
-        Polynomial r1 = Polynomial.shiftRight(z3, 2 * len);
-        Polynomial r2 = Polynomial.shiftRight(Polynomial.subtract(Polynomial.subtract(z2, z3), z1), len);
+        Polynomial r1 = Polynomial.addZeros(z3, 2 * len);
+        Polynomial r2 = Polynomial.addZeros(Polynomial.subtract(Polynomial.subtract(z2, z3), z1), len);
         Polynomial result = Polynomial.add(Polynomial.add(r1, r2), z1);
         return result;
     }

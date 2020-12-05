@@ -12,10 +12,10 @@ public final class Polynomial {
 
     public Polynomial(List<Integer> coefficients) {
         this.coefficients = coefficients;
-        this.degree = coefficients.size()-1;
+        this.degree = coefficients.size() - 1;
     }
 
-    public int getLength(){
+    public int getLength() {
         return this.coefficients.size();
     }
 
@@ -29,17 +29,17 @@ public final class Polynomial {
 
     public Polynomial(int degree) {
         this.degree = degree;
-        coefficients = new ArrayList<>(degree+1);
+        coefficients = new ArrayList<>(degree + 1);
         generateCoefficients();
     }
 
     private void generateCoefficients() {
         Random r = new Random();
         int MAX_VALUE = 10;
-        for (int i = 0; i<degree; i++){
+        for (int i = 0; i < degree; i++) {
             coefficients.add(r.nextInt(MAX_VALUE));
         }
-        coefficients.add(r.nextInt(MAX_VALUE)+1);
+        coefficients.add(r.nextInt(MAX_VALUE) + 1);
     }
 
     @Override
@@ -58,7 +58,7 @@ public final class Polynomial {
         return str.toString();
     }
 
-    public static Polynomial shiftRight(Polynomial p, int offset) {
+    public static Polynomial addZeros(Polynomial p, int offset) {
         List<Integer> coefficients = IntStream.range(0, offset).mapToObj(i -> 0).collect(Collectors.toList());
         coefficients.addAll(p.getCoefficients());
         return new Polynomial(coefficients);
