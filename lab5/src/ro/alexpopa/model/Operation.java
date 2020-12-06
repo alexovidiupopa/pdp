@@ -8,6 +8,7 @@ import java.util.stream.IntStream;
 
 public final class Operation {
     public static final int NR_THREADS = 5;
+    private static final int MAX_DEPTH = 4;
 
     public static Polynomial simpleSequential(Polynomial p1, Polynomial p2) {
         int sizeOfResultCoefficientList = p1.getDegree() + p2.getDegree() + 1;
@@ -79,7 +80,7 @@ public final class Operation {
     public static Polynomial karatsubaThreaded(Polynomial p1, Polynomial p2, int currentDepth)
             throws ExecutionException, InterruptedException {
         //the idea is that from a point it's not worth to split more
-        if (currentDepth > 4) {
+        if (currentDepth > MAX_DEPTH) {
             return karatsubaSequential(p1, p2);
         }
 
@@ -97,7 +98,7 @@ public final class Operation {
         Future<Polynomial> f1 = executor.submit(() -> karatsubaThreaded(lowP1, lowP2, currentDepth + 1));
         Future<Polynomial> f2 = executor.submit(() -> karatsubaThreaded(Polynomial.add(lowP1, highP1), Polynomial
                 .add(lowP2, highP2), currentDepth + 1));
-        Future<Polynomial> f3 = executor.submit(() -> karatsubaThreaded(highP1, highP2, currentDepth));
+        Future<Polynomial> f3 = executor.submit(() -> karatsubaThreaded(highP1, highP2, currentDepth + 1));
 
         executor.shutdown();
 

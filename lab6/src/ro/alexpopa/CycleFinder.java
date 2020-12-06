@@ -2,7 +2,7 @@ package ro.alexpopa;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -12,12 +12,14 @@ public final class CycleFinder implements Runnable{
     private final List<Integer> path;
     private final Lock lock;
     private final List<Integer> result;
+    private final AtomicBoolean aBoolean;
 
-    CycleFinder(DirectedGraph graph, int node, List<Integer> result) {
+    CycleFinder(DirectedGraph graph, int node, List<Integer> result, AtomicBoolean aBoolean) {
         this.graph = graph;
         this.startingNode = node;
         this.path = new ArrayList<>();
         this.lock = new ReentrantLock();
+        this.aBoolean = aBoolean;
         this.result = result;
     }
 
@@ -28,35 +30,27 @@ public final class CycleFinder implements Runnable{
 
     private void visit(int node) {
         path.add(node);
-
-        if (path.size() == graph.size()) {
-            if (graph.neighboursOf(node).contains(startingNode)){ //cycle is complete
-                this.lock.lock();
-                this.result.clear();
-                this.result.addAll(this.path);
-                this.lock.unlock();
+        if (!aBoolean.get()){
+            if (path.size() == graph.size()) {
+                if (graph.neighboursOf(node).contains(startingNode)){
+                    //found a cycle
+                    aBoolean.set(true);
+                    this.lock.lock();
+                    result.clear();
+                    result.addAll(this.path);
+                    //System.out.println(result);
+                    this.lock.unlock();
+                }
+                return;
             }
-            return;
+
+            graph.neighboursOf(node).forEach(neighbour->{
+                if (!this.path.contains(neighbour)){
+                    visit(neighbour);
+                }
+            });
         }
-
-        graph.neighboursOf(node).forEach(neighbour->{
-            if (!this.path.contains(neighbour)){
-                visit(neighbour);
-            }
-        });
     }
 
-    public static void findHamiltonian(DirectedGraph graph, int threadCount) throws InterruptedException {
-        ExecutorService pool = Executors.newFixedThreadPool(threadCount);
 
-        List<Integer> result = new ArrayList<>(graph.size());
-
-        for (int i = 0; i < graph.size(); i++){ //check from each node
-            pool.submit(new CycleFinder(graph, i, result));
-        }
-
-        pool.shutdown();
-
-        pool.awaitTermination(10, TimeUnit.SECONDS);
-    }
 }

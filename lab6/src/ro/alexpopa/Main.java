@@ -1,8 +1,15 @@
 package ro.alexpopa;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class Main {
 
-    private static final int NR_GRAPHS = 50;
+    private static final int NR_GRAPHS = 5000;
     private static final int NR_THREADS = 5;
 
     public static void main(String[] args) throws InterruptedException {
@@ -12,13 +19,28 @@ public class Main {
         }
     }
 
-    public static void test(int vertices, DirectedGraph graph, int threadCount) throws InterruptedException {
+    public static void test(int vertices, DirectedGraph graph, int nrThreads) throws InterruptedException {
         long startTime = System.nanoTime();
-        CycleFinder.findHamiltonian(graph, threadCount);
+        find(graph, nrThreads);
         long endTime = System.nanoTime();
         long duration = (endTime - startTime) / 1000000;
         System.out.println(vertices*10 + " vertices: " + duration + " ms");
     }
 
+    public static void find(DirectedGraph graph, int nrThreads) throws InterruptedException {
+        ExecutorService pool = Executors.newFixedThreadPool(nrThreads);
+
+        List<Integer> result = new ArrayList<>(graph.size());
+
+        AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+
+        for (int i = 0; i < graph.size(); i++){ //check from each node
+            pool.submit(new CycleFinder(graph, i, result, atomicBoolean));
+        }
+
+        pool.shutdown();
+
+        pool.awaitTermination(10, TimeUnit.SECONDS);
+    }
 
 }

@@ -56,7 +56,7 @@ public class Main {
     private static Polynomial karatsubaThreaded(Polynomial p, Polynomial q) throws ExecutionException,
             InterruptedException {
         long startTime = System.currentTimeMillis();
-        Polynomial result4 = Operation.karatsubaThreaded(p, q, 4);
+        Polynomial result4 = Operation.karatsubaThreaded(p, q, 1);
         long endTime = System.currentTimeMillis();
         System.out.println("Karatsuba parallel multiplication of polynomials: ");
         System.out.println("Execution time: " + (endTime - startTime) + " ms");
