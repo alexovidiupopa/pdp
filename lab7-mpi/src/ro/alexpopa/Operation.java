@@ -4,13 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Operation {
+
     public static Polynomial multiplySimple(Object o, Object o1, int begin, int end) {
         Polynomial p = (Polynomial) o;
         Polynomial q = (Polynomial) o1;
-        List<Integer> zeros = new ArrayList<>();
-        for (int i = 0; i < p.getDegree() * 2 + 1; i++)
-            zeros.add(0);
-        Polynomial result = new Polynomial(zeros);
+        Polynomial result = Polynomial.buildEmptyPolynomial(p.getDegree()*2 + 1);
         for (int i = begin; i < end; i++) {
             for (int j = 0; j < q.getCoefficients().size(); j++) {
                 result.getCoefficients().set(i + j, result.getCoefficients().get(i + j) + p.getCoefficients().get(i) * q.getCoefficients().get(j));
@@ -19,12 +17,9 @@ public class Operation {
         return result;
     }
 
-    public static Polynomial addUp(Object[] results) {
+    public static Polynomial buildResult(Object[] results) {
         int degree = ((Polynomial) results[0]).getDegree();
-        List<Integer> zeros = new ArrayList<>();
-        for (int i = 0; i < degree + 1; i++)
-            zeros.add(0);
-        Polynomial result = new Polynomial(zeros);
+        Polynomial result = Polynomial.buildEmptyPolynomial(degree+1);
         for (int i = 0; i < result.getCoefficients().size(); i++) {
             for (Object o : results) {
                 result.getCoefficients().set(i, result.getCoefficients().get(i) + ((Polynomial) o).getCoefficients().get(i));

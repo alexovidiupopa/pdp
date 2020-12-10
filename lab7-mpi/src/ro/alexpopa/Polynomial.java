@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public final class Polynomial implements Serializable {
+
     private final List<Integer> coefficients;
     private final int degree;
 
@@ -114,4 +115,8 @@ public final class Polynomial implements Serializable {
         }
     }
 
+    public static Polynomial buildEmptyPolynomial(int degree){
+        List<Integer> zeros = IntStream.range(0, degree).mapToObj(i -> 0).collect(Collectors.toList());
+        return new Polynomial(zeros);
+    }
 }
