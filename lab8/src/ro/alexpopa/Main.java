@@ -2,21 +2,20 @@ package ro.alexpopa;
 
 import mpi.MPI;
 import ro.alexpopa.msg.DSM;
-import ro.alexpopa.msg.Message;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 public class Main {
 
     public static void writeAll(DSM dsm) {
-        System.out.println("Write all");
-        System.out.println("Rank " + MPI.COMM_WORLD.Rank() + "->a = " + dsm.a + " b = " + dsm.b + " c = " + dsm.c + "\n");
-        System.out.println("Subscribers: ");
+        StringBuilder sb = new StringBuilder();
+        sb.append("Write all\n");
+        sb.append("Rank ").append(MPI.COMM_WORLD.Rank()).append("->a = ").append(dsm.a).append(" b = ").append(dsm.b).append(" c = ").append(dsm.c).append("\n");
+        sb.append("Subscribers: \n");
         for (String var : dsm.subscribers.keySet()) {
-            System.out.println(var + dsm.subscribers.get(var).toString());
+            sb.append(var).append(dsm.subscribers.get(var).toString());
         }
+        System.out.println(sb.toString());
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -32,49 +31,16 @@ public class Main {
             dsm.subscribeTo("a");
             dsm.subscribeTo("b");
             dsm.subscribeTo("c");
+            dsm.close();
+            thread.join();
 
-            BufferedReader obj = new BufferedReader(new InputStreamReader(System.in));
-
-            boolean done = false;
-            while (!done) {
-                System.out.println("1. Set var");
-                System.out.println("2. Change var");
-                System.out.println("0. Exit");
-                System.out.println(">>");
-                int ans = Integer.parseInt(obj.readLine());
-                if (ans == 0) {
-                    dsm.close();
-                    done = true;
-                } else if (ans == 1) {
-                    System.out.println("variable a/b/c: ");
-                    String var = obj.readLine();
-
-                    System.out.println("new value (int): ");
-                    int value = Integer.parseInt(obj.readLine());
-
-                    dsm.updateVariable(var, value);
-                    writeAll(dsm);
-                } else if (ans == 2) {
-                    System.out.println("variable a/b/c: ");
-                    String var = obj.readLine();
-
-                    System.out.println("old value (int): ");
-                    int old = Integer.parseInt(obj.readLine());
-
-                    System.out.println("new value (int): ");
-                    int newValue = Integer.parseInt(obj.readLine());
-
-                    dsm.checkAndReplace(var, old, newValue);
-                    //writeAll(dsm);
-                }
-            }
         } else if (me == 1) {
             Thread thread = new Thread(new Listener(dsm));
 
             thread.start();
 
             dsm.subscribeTo("a");
-
+            dsm.close();
             thread.join();
         } else if (me == 2) {
             Thread thread = new Thread(new Listener(dsm));
@@ -82,7 +48,8 @@ public class Main {
             thread.start();
 
             dsm.subscribeTo("b");
-
+            dsm.checkAndReplace("b",1,100);
+            dsm.close();
             thread.join();
         }
         MPI.Finalize();
