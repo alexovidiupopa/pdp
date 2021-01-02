@@ -1,0 +1,53 @@
+while(!queue.isEmpty()){
+            Matrix current = queue.poll();
+
+            if(current.evaluate() == 0 && current.numOfSteps < leastMoves){
+                System.out.println("Found a solution");
+                bestSolution = current;
+                leastMoves = current.numOfSteps;
+                int finalLeastMoves = leastMoves;
+                PriorityBlockingQueue<Matrix> aux = new PriorityBlockingQueue<>(10, Comparator.comparingInt(e -> e.estimation));
+                queue.stream().takeWhile(e -> e.estimation < finalLeastMoves)
+                        .forEach(aux::add);
+                queue = aux;
+            }
+
+            int finalLeastMoves1 = leastMoves;
+            PriorityBlockingQueue<Matrix> finalQueue = queue;
+            current.generateMoves(0).stream()
+                    .filter(e -> e.estimation < finalLeastMoves1)
+            .forEach(finalQueue::add);
+
+            k++;
+            if(k == 1000000){
+                //System.out.println(System.currentTimeMillis() - time);
+                time = System.currentTimeMillis();
+                //System.out.println("Best candidate:" + current);
+                k = 0;
+            }
+        }
+        return bestSolution;
+
+
+
+
+
+                while(!queue.isEmpty() && queue.peek().estimation < leastMoves){
+                    Matrix current = queue.poll();
+
+                    if(current.evaluate() == 0 && current.numOfSteps < leastMoves){
+                        System.out.println("Found a solution");
+                        bestSolution = current;
+                        leastMoves = current.numOfSteps;
+                    }
+
+                    k++;
+                    if(k == 1000000){
+                        //System.out.println(System.currentTimeMillis() - time);
+                        time = System.currentTimeMillis();
+                        //System.out.println("Best candidate:" + current);
+                        k = 0;
+                    }
+                    queue.addAll(current.generateMoves(0));
+                }
+                return bestSolution;
