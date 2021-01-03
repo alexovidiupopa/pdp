@@ -2,7 +2,7 @@ package ro.alexpopa.msg;
 
 import java.io.Serializable;
 
-public class SubscribeMessage implements Serializable {
+public class SubscribeMessage extends Message implements Serializable  {
 
     public String var;
     public int rank;

@@ -2,7 +2,7 @@ package ro.alexpopa.msg;
 
 import java.io.Serializable;
 
-public class UpdateMessage implements Serializable {
+public class UpdateMessage extends Message implements Serializable {
 
     public String var;
     public int val;
