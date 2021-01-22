@@ -4,7 +4,7 @@ import mpi.MPI;
 
 public class Main {
 
-    private static final String MULTIPLICATION = "Karatsuba";
+    private static final String MULTIPLICATION = "Simple";
     private static final int POLYNOMIAL_ORDER = 5;
 
     private static void multiplicationMaster(Polynomial p, Polynomial q, int nrProcs, String type) {
