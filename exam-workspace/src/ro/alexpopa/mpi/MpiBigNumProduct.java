@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class BigNumMpi {
+public class MpiBigNumProduct {
 
 
     public static void master(List<Integer> a, List<Integer> b, int nrProcs){

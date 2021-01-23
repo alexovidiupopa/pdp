@@ -1,18 +1,20 @@
 package ro.alexpopa;
 
 
+import ro.alexpopa.threaded.Convolution;
 import ro.alexpopa.threaded.Permutations;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Main {
 
     public static void main(String[] args) throws InterruptedException {
 	// write your code here
-        Permutations p = new Permutations();
-        p.back(new ArrayList<>(), 2, 3);
-        p.executorService.shutdown();
-        System.out.println(p.cnt.get());
+//        Permutations p = new Permutations();
+//        p.back(new ArrayList<>(), 2, 3);
+//        p.executorService.shutdown();
+//        System.out.println(p.cnt.get());
 //        KCombinations kc = new KCombinations();
 //        kc.generate(new ArrayList<>(), 3, 5, 2);
 //        kc.executorService.shutdown();
@@ -23,8 +25,8 @@ public class Main {
 //        System.out.println(sps.scalarProduct(Arrays.asList(1,2,3,4), Arrays.asList(2,3,4,5),4));
         //ScalarProductTree spt = new ScalarProductTree();
        // System.out.println(spt.scalarProduct(Arrays.asList(1,2,3,4), Arrays.asList(2,3,4,5),4));
-        //Convolution c = new Convolution();
-        //System.out.println(c.convolution(Arrays.asList(1,2,3),Arrays.asList(1,2,3),4));
+//        Convolution c = new Convolution();
+//        System.out.println(c.convolution(Arrays.asList(1,2,3),Arrays.asList(1,2,3),4));
 //        boolean[][] graph = new boolean[][]{{false, true, false, true, false},
 //                {true, false, true, true, true},
 //                {false, true, false, false, true},
