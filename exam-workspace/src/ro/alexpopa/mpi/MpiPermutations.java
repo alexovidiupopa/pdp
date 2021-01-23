@@ -1,4 +1,4 @@
-package ro.alexpopa;
+package ro.alexpopa.mpi;
 
 import mpi.MPI;
 

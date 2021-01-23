@@ -1,4 +1,4 @@
-package ro.alexpopa;
+package ro.alexpopa.threaded;
 
 // number of permutations of N that satisfy a given property
 
@@ -22,6 +22,7 @@ public class Permutations {
 
     public void back(List<Integer> sol, int T,int n) throws InterruptedException {
         if(sol.size()==n){
+            System.out.println(sol.toString());
             if(check(sol)){
                 System.out.println(sol.toString());
                 cnt.getAndIncrement();
@@ -37,8 +38,7 @@ public class Permutations {
             }
         }
         else {
-            List<Integer> x = new ArrayList<>();
-            x.addAll(sol);
+            List<Integer> x = new ArrayList<>(sol);
             executorService.submit(()->{
                 for(int i=1;i<=n;i+=2){
                     if(x.contains(i)) continue;

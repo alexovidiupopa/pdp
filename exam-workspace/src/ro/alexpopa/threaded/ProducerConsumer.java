@@ -1,4 +1,4 @@
-package ro.alexpopa;
+package ro.alexpopa.threaded;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
