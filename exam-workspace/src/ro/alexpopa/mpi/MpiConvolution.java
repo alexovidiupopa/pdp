@@ -42,6 +42,10 @@ public class MpiConvolution {
             MPI.COMM_WORLD.Send(new Object[]{a},0,1,MPI.OBJECT,i,0);
             MPI.COMM_WORLD.Send(new Object[]{b},0,1,MPI.OBJECT,i,0);
 
+            start = stop;
+        }
+
+        for (int i = 1; i <= toShare ; i++) {
             Object[] received = new Object[1];
 
             MPI.COMM_WORLD.Recv(received,0, 1, MPI.OBJECT, i, 0);
@@ -52,9 +56,7 @@ public class MpiConvolution {
                 result.set(p,result.get(p) + receivedList.get(p));
             }
 
-            start = stop;
         }
-
         System.out.println(result);
     }
 

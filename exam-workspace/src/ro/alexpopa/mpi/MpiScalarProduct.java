@@ -33,19 +33,23 @@ public class MpiScalarProduct {
             MPI.COMM_WORLD.Send(new Object[]{a},0,1,MPI.OBJECT,i,0);
             MPI.COMM_WORLD.Send(new Object[]{b},0,1,MPI.OBJECT,i,0);
 
-            Object[] received = new Object[1];
+            start = stop;
+        }
 
+        for (int i = 1; i <= toShare; i++) {
+            Object[] received = new Object[1];
+            int[] metadata = new int[2];
+            MPI.COMM_WORLD.Recv(metadata, 0, 2, MPI.INT, i, 0);
             MPI.COMM_WORLD.Recv(received,0, 1, MPI.OBJECT, i, 0);
 
+            start = metadata[0];
+            stop = metadata[1];
             List<Integer> receivedList = (List<Integer>) received[0];
 
             for (int p = start; p < stop; p++) {
                 result.set(p, receivedList.get(p));
             }
-
-            start = stop;
         }
-
         System.out.println(result.stream().reduce(0,(x,y)-> x+y));
     }
 
@@ -67,6 +71,7 @@ public class MpiScalarProduct {
             result.set(i,a.get(i) * b.get(i));
         }
 
+        MPI.COMM_WORLD.Send(metadata, 0, 2, MPI.INT, 0, 0);
         MPI.COMM_WORLD.Send(new Object[]{result}, 0, 1, MPI.OBJECT, 0, 0);
     }
 

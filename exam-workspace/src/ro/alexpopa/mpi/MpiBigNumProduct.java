@@ -44,6 +44,9 @@ public class MpiBigNumProduct {
             MPI.COMM_WORLD.Send(new Object[]{a},0,1,MPI.OBJECT,i,0);
             MPI.COMM_WORLD.Send(new Object[]{bCopy},0,1,MPI.OBJECT,i,0);
 
+            start = stop;
+        }
+        for (int i = 1; i <= toShare ; i++) {
             Object[] received = new Object[1];
 
             MPI.COMM_WORLD.Recv(received,0, 1, MPI.OBJECT, i, 0);
@@ -57,7 +60,6 @@ public class MpiBigNumProduct {
                 result.set(p,result.get(p)%10);
             }
 
-            start = stop;
         }
         if (carry==1){
             result.set(m, 1);
