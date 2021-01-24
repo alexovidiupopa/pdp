@@ -37,17 +37,25 @@ public class MpiMatrixSum {
             MPI.COMM_WORLD.Send(new Object[]{a},0,1,MPI.OBJECT,i,0);
             MPI.COMM_WORLD.Send(new Object[]{b},0,1,MPI.OBJECT,i,0);
 
+
+            start = stop;
+        }
+        for (int i = 1; i <= toShare ; i++) {
             Object[] ans = new Object[1];
-            MPI.COMM_WORLD.Recv(ans,0,1,MPI.OBJECT,i,0);
+            int[] metadata = new int[2];
+            MPI.COMM_WORLD.Recv(metadata,0,2,MPI.INT,i,0);
+            MPI.COMM_WORLD.Recv(ans, 0, 1, MPI.OBJECT, i, 0);
             List<List<Integer>> answer = (List<List<Integer>>) ans[0];
-            for (int j = start; j < stop ; j++) {
-                for (int k = 0; k < answer.get(0).size();  k++) {
+            start = metadata[0];
+            stop = metadata[1];
+            for (int j = start; j < stop; j++) {
+                for (int k = 0; k < answer.get(0).size(); k++) {
                     c.get(j).set(k, c.get(j).get(k) + answer.get(j).get(k));
                 }
 
             }
-            start = stop;
         }
+
         System.out.println(c.toString());
     }
 
@@ -77,6 +85,7 @@ public class MpiMatrixSum {
             }
 
         }
+        MPI.COMM_WORLD.Send(metadata,0,2,MPI.INT, 0,0);
         MPI.COMM_WORLD.Send(new Object[]{c},0,1,MPI.OBJECT, 0,0);
     }
 

@@ -2,15 +2,13 @@ package ro.alexpopa.mpi;
 
 import mpi.MPI;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class MpiMatrixProduct {
-
+public class MpiMatrixPower {
     int getIndexFromCell(int i, int j, int m) {
         return i * m + j;
     }
@@ -42,21 +40,23 @@ public class MpiMatrixProduct {
         return matrix;
     }
 
-    Integer computeSingleElement(List<List<Integer>> a, List<List<Integer>> b, int i, int j) {
+    Integer computeSingleElement(List<List<Integer>> a, int i, int j, int pow) {
         int sum = 0;
-        for (int k = 0; k < b.size(); ++k) {
-            sum += a.get(i).get(k) * b.get(k).get(j);
+        for(int p=1;p<=pow;p++) {
+            for (int k = 0; k < a.size(); ++k) {
+                sum += a.get(i).get(k) * a.get(k).get(j);
+            }
         }
         return sum;
     }
 
-    List<List<Integer>> work(int n, int m, List<List<Integer>> a, List<List<Integer>> b, List<Integer> cells) {
+    List<List<Integer>> work(int n, int m, List<List<Integer>> a, List<Integer> cells, int pow) {
         List<List<Integer>> matrix = createEmptyMatrix(n, m);
         cells.stream()
                 .map(cell -> getCellFromIndex(cell, m))
                 .forEach(cell -> {
                     int i = cell.get(0), j = cell.get(1);
-                    matrix.get(i).set(j, computeSingleElement(a, b, i, j));
+                    matrix.get(i).set(j, computeSingleElement(a, i, j, pow));
                 });
         return matrix;
     }
@@ -71,19 +71,20 @@ public class MpiMatrixProduct {
         }
     }
 
-    void master(int nrProcesses, List<List<Integer>> a, List<List<Integer>> b) {
-        int n = a.size(), m = b.get(0).size();
+    void master(int nrProcesses, List<List<Integer>> a, int pow) {
+        int n = a.size(), m = a.get(0).size();
         List<Integer> masterCells = getCellsById(0, n, m, nrProcesses);
         List<List<Integer>> solution = createEmptyMatrix(n, m);
 
         for (int i = 1; i < nrProcesses; ++i) {
             List<Integer> childCells = getCellsById(i, n, m, nrProcesses);
+            MPI.COMM_WORLD.Send(new int[]{pow}, 0, 1, MPI.INT, i, 0);
             MPI.COMM_WORLD.Send(new Object[]{a}, 0, 1, MPI.OBJECT, i, 0);
-            MPI.COMM_WORLD.Send(new Object[]{b}, 0, 1, MPI.OBJECT, i, 0);
+            MPI.COMM_WORLD.Send(new Object[]{a}, 0, 1, MPI.OBJECT, i, 0);
             MPI.COMM_WORLD.Send(new Object[]{childCells}, 0, 1, MPI.OBJECT, i, 0);
         }
 
-        List<List<Integer>> part = work(n, m, a, b, masterCells);
+        List<List<Integer>> part = work(n, m, a, masterCells, pow);
         unitePartialSolution(solution, part);
         for (int i = 1; i < nrProcesses; ++i) {
             Object[] temp = new Object[1];
@@ -96,9 +97,11 @@ public class MpiMatrixProduct {
     }
 
     void worker(int myId, int nrProcesses) {
+        int[] pow = new int[1];
         Object[] a = new Object[1];
         Object[] b = new Object[1];
         Object[] c = new Object[1];
+        MPI.COMM_WORLD.Recv(pow, 0, 1, MPI.INT, 0, 0);
         MPI.COMM_WORLD.Recv(a, 0, 1, MPI.OBJECT, 0, 0);
         MPI.COMM_WORLD.Recv(b, 0, 1, MPI.OBJECT, 0, 0);
         MPI.COMM_WORLD.Recv(c, 0, 1, MPI.OBJECT, 0, 0);
@@ -107,7 +110,7 @@ public class MpiMatrixProduct {
         List<Integer> cells = (List<Integer>) c[0];
 
         int n = matrix1.size(), m = matrix2.get(0).size();
-        List<List<Integer>> part = work(n, m, matrix1, matrix2, cells);
+        List<List<Integer>> part = work(n, m, matrix1, cells, pow[0]);
         MPI.COMM_WORLD.Send(new Object[]{part}, 0, 1, MPI.OBJECT, 0, 1);
     }
 
@@ -117,13 +120,12 @@ public class MpiMatrixProduct {
         int currentIndex = MPI.COMM_WORLD.Rank();
         int clusterSize = MPI.COMM_WORLD.Size();
 
-        List<List<Integer>> a = Arrays.asList(Arrays.asList(1, 2, 10), Arrays.asList(1, 2, 3), Arrays.asList(1, 2, 3));
-        List<List<Integer>> b = Arrays.asList(Arrays.asList(3, 2), Arrays.asList(3, 2), Arrays.asList(3, 2));
-
+        List<List<Integer>> a = Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(1, 2, 3), Arrays.asList(1, 2, 3));
+        int pow = 3;
 
         if (currentIndex == 0)
         {
-            master(clusterSize, a, b);
+            master(clusterSize, a, pow);
         }
         else
         {
@@ -133,6 +135,6 @@ public class MpiMatrixProduct {
     }
 
     public static void main(String[] args) {
-        new MpiMatrixProduct().run(args);
+        new MpiMatrixPower().run(args);
     }
 }
